@@ -45,8 +45,7 @@ public class NbtCommand extends Command {
             return "[NBTVIEWER] you are not an player";
         }
     }
-
-    @CommandExecutor(subCommand = "view raw")
+    @CommandExecutor(subCommand = "view_raw")
     private String viewRawNbt() {
         if (mc.player != null) {
             ItemStack currentItem = mc.player.getMainHandItem();
@@ -68,7 +67,7 @@ public class NbtCommand extends Command {
             return "[NBTVIEWER] you are not an player";
         }
     }
-    @CommandExecutor(subCommand = "copy pretty")
+    @CommandExecutor(subCommand = "copy_pretty")
     private String copyPrettyNbt() {
         if (mc.player != null) {
             ItemStack currentItem = mc.player.getMainHandItem();
@@ -126,6 +125,42 @@ public class NbtCommand extends Command {
                 }
             } catch (UnsupportedFlavorException | IOException | CommandSyntaxException e) {
                 return "[NBTVIEWER] error pasting nbt data from clipboard";
+            }
+        } else {
+            return "[NBTVIEWER] you are not an player";
+        }
+    }
+    @CommandExecutor(subCommand = "clear")
+    private String clearNbt() {
+        if (mc.player != null) {
+            ItemStack currentItem = mc.player.getMainHandItem();
+            if (!currentItem.isEmpty()) {
+                currentItem.setTag(new CompoundTag());
+                return "[NBTVIEWER] cleared nbt data";
+            } else {
+                return "[NBTVIEWER] no held item";
+            }
+        } else {
+            return "[NBTVIEWER] you are not an player";
+        }
+    }
+    @CommandExecutor(subCommand = "add")
+    @CommandExecutor.Argument("string")
+    private String addNbt(String nbt) {
+        if (mc.player != null) {
+            ItemStack currentItem = mc.player.getMainHandItem();
+            if (!currentItem.isEmpty()) {
+                try {
+                    CompoundTag itemNBT = currentItem.getTag();
+                    CompoundTag newNBT = TagParser.parseTag(nbt);
+                    itemNBT.merge(newNBT);
+                    currentItem.setTag(itemNBT);
+                    return "[NBTVIEWER] added nbt data";
+                } catch (CommandSyntaxException e) {
+                    return "[NBTVIEWER] error adding nbt data";
+                }
+            } else {
+                return "[NBTVIEWER] no held item";
             }
         } else {
             return "[NBTVIEWER] you are not an player";
