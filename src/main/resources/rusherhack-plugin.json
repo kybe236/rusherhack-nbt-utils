@@ -1,0 +1,12 @@
+{
+  "Plugin-Class": "org.nbt.NbtMain",
+  "Name": "NBT reader",
+  "Version": "${plugin_version}",
+  "Description": "NBT reader",
+  "Authors": [
+    "kybe236"
+  ],
+  "Minecraft-Versions": [
+    "1.20.4"
+  ]
+}
