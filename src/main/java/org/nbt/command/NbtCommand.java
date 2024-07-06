@@ -45,7 +45,8 @@ public class NbtCommand extends Command {
             return "[NBTVIEWER] you are not an player";
         }
     }
-    @CommandExecutor(subCommand = "view_raw")
+
+    @CommandExecutor(subCommand = "view raw")
     private String viewRawNbt() {
         if (mc.player != null) {
             ItemStack currentItem = mc.player.getMainHandItem();
@@ -67,7 +68,7 @@ public class NbtCommand extends Command {
             return "[NBTVIEWER] you are not an player";
         }
     }
-    @CommandExecutor(subCommand = "copy_pretty")
+    @CommandExecutor(subCommand = "copy pretty")
     private String copyPrettyNbt() {
         if (mc.player != null) {
             ItemStack currentItem = mc.player.getMainHandItem();
