@@ -16,6 +16,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.util.Optional;
 
 public class NbtCommand extends Command {
 
@@ -24,7 +25,8 @@ public class NbtCommand extends Command {
     }
 
     @CommandExecutor(subCommand = "view")
-    private String viewNbt() {
+    @CommandExecutor.Argument("raw")
+    private String viewNbt(Optional<String> raw) {
         if (mc.player != null) {
             ItemStack currentItem = mc.player.getMainHandItem();
 
@@ -32,7 +34,11 @@ public class NbtCommand extends Command {
                 CompoundTag itemNBT = currentItem.getTag();
 
                 if (!itemNBT.isEmpty()) {
-                    return "[NBTVIEWER]\n" + NbtUtils.prettyPrint(itemNBT);
+                    if (!raw.isEmpty()){
+                        return "[NBTVIEWER]\n" + itemNBT.toString();
+                    } else {
+                        return "[NBTVIEWER]\n" + NbtUtils.prettyPrint(itemNBT);
+                    }
                 }
                 else {
                     return "[NBTVIEWER] held item has no nbt data";
@@ -42,62 +48,23 @@ public class NbtCommand extends Command {
             }
         }
         else {
-            return "[NBTVIEWER] you are not an player";
-        }
-    }
-    @CommandExecutor(subCommand = "view_raw")
-    private String viewRawNbt() {
-        if (mc.player != null) {
-            ItemStack currentItem = mc.player.getMainHandItem();
-
-            if (!currentItem.isEmpty()) {
-                CompoundTag itemNBT = currentItem.getTag();
-
-                if (!itemNBT.isEmpty()) {
-                    return "[NBTVIEWER]\n" + itemNBT.toString();
-                }
-                else {
-                    return "[NBTVIEWER] held item has no nbt data";
-                }
-            } else {
-                return "[NBTVIEWER] no held item";
-            }
-        }
-        else {
-            return "[NBTVIEWER] you are not an player";
-        }
-    }
-    @CommandExecutor(subCommand = "copy_pretty")
-    private String copyPrettyNbt() {
-        if (mc.player != null) {
-            ItemStack currentItem = mc.player.getMainHandItem();
-
-            if (!currentItem.isEmpty()) {
-                CompoundTag itemNBT = currentItem.getTag();
-
-                if (!itemNBT.isEmpty()) {
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(NbtUtils.prettyPrint(itemNBT)), null);
-                    return "[NBTVIEWER] copied nbt data to clipboard";
-                } else {
-                    return "[NBTVIEWER] held item has no nbt data";
-                }
-            } else {
-                return "[NBTVIEWER] no held item";
-            }
-            
-        } else {
             return "[NBTVIEWER] you are not an player";
         }
     }
     @CommandExecutor(subCommand = "copy")
-    private String copyNbt() {
+    @CommandExecutor.Argument("pretty")
+    private String copyNbt(Optional<String> pretty) {
         if (mc.player != null) {
             ItemStack currentItem = mc.player.getMainHandItem();
 
             if (!currentItem.isEmpty()) {
                 CompoundTag itemNBT = currentItem.getTag();
                 if (!itemNBT.isEmpty()) {
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(itemNBT.toString()), null);
+                    if (!pretty.isEmpty()) {
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(NbtUtils.prettyPrint(itemNBT)), null);
+                    } else {
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(itemNBT.toString()), null);
+                    }
                     return "[NBTVIEWER] copied nbt data to clipboard";
                 } else {
                     return "[NBTVIEWER] held item has no nbt data";
@@ -158,6 +125,28 @@ public class NbtCommand extends Command {
                     return "[NBTVIEWER] added nbt data";
                 } catch (CommandSyntaxException e) {
                     return "[NBTVIEWER] error adding nbt data";
+                }
+            } else {
+                return "[NBTVIEWER] no held item";
+            }
+        } else {
+            return "[NBTVIEWER] you are not an player";
+        }
+    }
+    @CommandExecutor(subCommand = "merge")
+    private String mergeNbt() {
+        if (mc.player != null) {
+            ItemStack currentItem = mc.player.getMainHandItem();
+            if (!currentItem.isEmpty()) {
+                try {
+                    String clipboard = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+                    CompoundTag nbt = TagParser.parseTag(clipboard);
+                    CompoundTag itemNBT = currentItem.getTag();
+                    itemNBT.merge(nbt);
+                    currentItem.setTag(itemNBT);
+                    return "[NBTVIEWER] merged nbt data";
+                } catch (UnsupportedFlavorException | IOException | CommandSyntaxException e) {
+                    return "[NBTVIEWER] error merging nbt data";
                 }
             } else {
                 return "[NBTVIEWER] no held item";
